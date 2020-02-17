@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>settlement_parent</artifactId>
+        <groupId>com.beyondsoft</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>settlement_web_manager</artifactId>
+
+<dependencies>
+
+    <dependency>
+        <groupId>com.beyondsoft</groupId>
+        <artifactId>settlement_service_sysuser</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>com.beyondsoft</groupId>
+        <artifactId>settlement_service_bapg</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>com.beyondsoft</groupId>
+        <artifactId>settlement_service_bacontract</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>com.beyondsoft</groupId>
+        <artifactId>settlement_service_workattendance</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>com.beyondsoft</groupId>
+        <artifactId>settlement_service_bacontract</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>com.beyondsoft</groupId>
+        <artifactId>settlement_service_baapplyTransfer</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>com.beyondsoft</groupId>
+        <artifactId>settlement_common_service</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>com.beyondsoft</groupId>
+        <artifactId>settlement_service_sysuser</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>compile</scope>
+    </dependency>
+</dependencies>
+
+
+    <build>
+        <plugins>
+            <!-- 编译插件-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12.4</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!--fork:如果没有该项配置,整个devtools不会起作用-->
+                    <fork>true</fork>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

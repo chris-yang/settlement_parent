@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.settlement.mapper.BaPgTimeParamMapper">
+
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.settlement.entity.BaPgTimeParam">
+        <id column="id" property="id" />
+        <result column="pg_id" property="pgId" />
+        <result column="t_p_id" property="tPId" />
+    </resultMap>
+    <!--批量插入-->
+    <insert id="saveBatchs" parameterType="java.util.List" >
+        insert into ba_pg_time_param(pg_id,t_p_id) values
+        <foreach collection="list" item="baPgTimeParams" index="index" separator=",">
+            (#{baPgTimeParams.pgId},#{baPgTimeParams.tPId})
+        </foreach>
+    </insert>
+
+    <select id="getCheckPgTimeExist" parameterType="java.util.Map" resultType="int">
+        select
+        count(1)
+        from ba_pg_time_param pgt
+        inner join ba_time_param t on t.id = pgt.t_p_id
+        where t.type=#{type}
+        and pg_id=#{projectId}
+    </select>
+</mapper>

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.settlement.mapper.BaEmployeeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.settlement.entity.BaEmployee">
+        <id column="id" property="id" />
+        <result column="emp_name" property="empName" />
+        <result column="code" property="code" />
+        <result column="entrance_time" property="entranceTime" />
+        <result column="card_no" property="cardNo" />
+        <result column="place" property="place" />
+        <result column="responsible_person" property="responsiblePerson" />
+        <result column="rp_email" property="rpEmail" />
+        <result column="send_copy_email" property="sendCopyEmail" />
+        <result column="position" property="position" />
+        <result column="level_mode" property="levelMode" />
+        <result column="pos_level" property="posLevel" />
+        <result column="pos_level_input" property="posLevelInput" />
+        <result column="price_month" property="priceMonth" />
+        <result column="unit" property="unit" />
+        <result column="price_day" property="priceDay" />
+        <result column="claim_expense_person" property="claimExpensePerson" />
+        <result column="work_attendence_person" property="workAttendencePerson" />
+        <result column="salary_month" property="salaryMonth" />
+        <result column="salary_day" property="salaryDay" />
+        <result column="upload_rate_email" property="uploadRateEmail" />
+        <result column="rate_email_filename" property="rateEmailFilename" />
+        <result column="job_status" property="jobStatus" />
+        <result column="entrance_status" property="entranceStatus" />
+        <result column="create_user_id" property="createUserId" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="apply_update_status" property="applyUpdateStatus" />
+        <result column="del_flag" property="delFlag" />
+    </resultMap>
+
+
+    <select id="getEmployeeList" parameterType="com.settlement.co.EmployeeCo" resultType="com.settlement.vo.EmployeeVo">
+        SELECT * FROM
+        (SELECT
+        be.id,
+        be.emp_name,
+        be.`code`,
+        be.entrance_time,
+        be.pos_level,
+        blp.level_name as pos_level_input,
+        be.responsible_person,
+        be.upload_rate_email,
+        be.send_copy_email,
+        be.rp_email,
+        be.rate_email_filename,
+        bpe.pg_id,
+        be.claim_expense_person,
+        be.create_time,
+        be.place,
+        be.apply_update_status,
+        sdd.dic_content as applyUpdateStatusContent,
+        be.price_month,
+        be.unit,
+        sdd1.dic_content as unitContent,
+        be.work_attendence_person,
+        be.position,
+        be.price_day
+        FROM
+        ba_employee be left join ba_pg_emp bpe on  be.id = bpe.emp_id
+        left join sys_data_dic sdd on be.apply_update_status = sdd.dic_code
+        left join ba_level_price blp on be.pos_level = blp.id
+        left join sys_data_dic sdd1 on sdd1.dic_code = be.unit
+        WHERE
+        be.del_flag =  #{employeeCo.delFlag}
+        and bpe.pg_id = #{employeeCo.pgId}
+        and be.level_mode = #{employeeCo.levelModeF}
+        and bpe.entrance_status = #{employeeCo.entranceStatus}
+        UNION ALL
+        SELECT
+        be.id,
+        be.emp_name,
+        be.`code`,
+        be.entrance_time,
+        be.pos_level,
+        be.pos_level_input,
+        be.responsible_person,
+        be.upload_rate_email,
+        be.send_copy_email,
+        be.rp_email,
+        be.rate_email_filename,
+        bpe.pg_id,
+        be.claim_expense_person,
+        be.create_time,
+        be.place,
+        be.apply_update_status,
+        sdd.dic_content as applyUpdateStatusContent,
+        be.price_month,
+        be.unit,
+        sdd1.dic_content as unitContent,
+        be.work_attendence_person,
+        be.position,
+        be.price_day
+        FROM
+        ba_employee be left join ba_pg_emp bpe on  be.id = bpe.emp_id
+        left join sys_data_dic sdd on be.apply_update_status = sdd.dic_code
+        left join sys_data_dic sdd1 on sdd1.dic_code = be.unit
+        WHERE
+        be.del_flag =  #{employeeCo.delFlag}
+        and bpe.pg_id = #{employeeCo.pgId}
+        and be.level_mode = #{employeeCo.levelModeH}
+        and bpe.entrance_status = #{employeeCo.entranceStatus}
+        ) emp
+        <where>
+            <if test="employeeCo.keyword != null and employeeCo.keyword !='' ">
+                and CONCAT(emp.emp_name) like CONCAT('%',#{employeeCo.keyword},'%')
+            </if>
+        </where>
+        order by emp.create_time
+    </select>
+
+    <update id="updateBatchEntranceStatusById" parameterType="java.util.List">
+        <foreach collection="emps" item="emp" index="index" separator=";">
+            update ba_employee
+            set
+            entrance_status = #{emp.entranceStatus},
+            update_time = #{emp.updateTime}
+            where id = #{emp.id}
+        </foreach>
+    </update>
+    <!-- 批量修改员工申请状态 -->
+    <update id="updateApplyEmpStatusBatch" parameterType="java.util.List">
+        <foreach collection="emps" item="emp" index="index" separator=";">
+            update ba_employee
+            set
+            apply_update_status = #{emp.applyUpdateStatus},
+            update_time = #{emp.updateTime}
+            where id = #{emp.id}
+        </foreach>
+    </update>
+
+    <select id="getGenerateWorkattendPageData" parameterType="com.settlement.co.EmployeeCo" resultType="com.settlement.vo.EmployeeVo">
+    select
+	    ee.id
+	    ,ee.emp_name as empName
+	    ,ee.`code` as code
+	    ,ee.pg_id as pgId
+	    ,ee.entrance_time as entranceTime
+     from
+        (select
+            pe.pg_id
+            ,e.id
+            ,e.`code`
+            ,e.emp_name
+            ,e.entrance_time
+        from ba_employee e
+        inner join ba_pg_emp pe on e.id=pe.emp_id
+        where pe.pg_id=#{employeeCo.pgId}
+            and e.del_flag = #{employeeCo.delFlag}
+            and pe.entrance_status = #{employeeCo.entranceStatus}
+		) ee
+    where (
+        select
+            count(1)
+        from ba_work_attendance w
+        where w.pg_id=#{employeeCo.pgId}
+             and w.employee_id=ee.id
+             and DATE_FORMAT(w.create_time,'%Y-%m')=DATE_FORMAT(#{employeeCo.currentTime},'%Y-%m')
+             )=0
+    </select>
+</mapper>

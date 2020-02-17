@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.settlement.mapper.BaWorkAttendanceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.settlement.entity.BaWorkAttendance">
+        <id column="id" property="id" />
+        <result column="work_days" property="workDays" />
+        <result column="attendance_days" property="attendanceDays" />
+        <result column="absenteeism_days" property="absenteeismDays" />
+        <result column="float_performance" property="floatPerformance" />
+        <result column="bonus" property="bonus" />
+        <result column="check_work_days" property="checkWorkDays" />
+        <result column="work_day_overtime_h" property="workDayOvertimeH" />
+        <result column="weekend_overtime_h" property="weekendOvertimeH" />
+        <result column="festival_overtime_h" property="festivalOvertimeH" />
+        <result column="work_day_overtime_d" property="workDayOvertimeD" />
+        <result column="weekend_overtime_d" property="weekendOvertimeD" />
+        <result column="festival_overtime_d" property="festivalOvertimeD" />
+        <result column="remainder_overtime_lm_h" property="remainderOvertimeLmH" />
+        <result column="month_overtime_h" property="monthOvertimeH" />
+        <result column="take_hours_off" property="takeHoursOff" />
+        <result column="details" property="details" />
+        <result column="remainder_overtime_m_h" property="remainderOvertimeMH" />
+        <result column="taxi_fare" property="taxiFare" />
+        <result column="travel_expenses" property="travelExpenses" />
+        <result column="meals" property="meals" />
+        <result column="telephone_bill" property="telephoneBill" />
+        <result column="overtime_allowance" property="overtimeAllowance" />
+        <result column="other_add_cost" property="otherAddCost" />
+        <result column="other_sub_cost" property="otherSubCost" />
+        <result column="remark" property="remark" />
+        <result column="sub_status" property="subStatus" />
+        <result column="create_time" property="createTime" />
+        <result column="pg_id" property="pgId" />
+        <result column="employee_id" property="employeeId" />
+        <result column="work_month" property="workMonth" />
+    </resultMap>
+
+    <!-- 根据项目组id获得当前项目组的员工考勤信息-->
+    <select id="getWorkAttendanceVoByProjectId" parameterType="com.settlement.co.WorkAttendanceCo" resultType="com.settlement.vo.BaWorkAttendanceVo">
+        select
+            w.id ,
+            e.emp_name as employeeName,
+            e.`code` as employeeCode,
+            w.work_days ,
+            w.attendance_days ,
+            w.absenteeism_days ,
+            w.sub_status,
+            d.dic_content as subStatusContent,
+            w.float_performance,
+            w.bonus,
+            w.check_work_days,
+            w.work_day_overtime_h,
+            w.weekend_overtime_h,
+            w.festival_overtime_h,
+            w.work_day_overtime_d,
+            w.weekend_overtime_d,
+            w.festival_overtime_d,
+            w.remainder_overtime_lm_h,
+            w.month_overtime_h,
+            w.take_hours_off,
+            w.details ,
+            w.remainder_overtime_m_h,
+            w.taxi_fare,
+            w.travel_expenses,
+            w.meals,
+            w.telephone_bill,
+            w.overtime_allowance,
+            w.other_add_cost,
+            w.other_sub_cost,
+            w.remark ,
+            w.create_time,
+            w.pg_id,
+            w.employee_id
+        from ba_work_attendance w
+        inner join ba_pg_emp pe on pe.emp_id=w.employee_id and pe.pg_id=w.pg_id
+        inner join sys_data_dic d on d.dic_code=w.sub_status
+        inner join ba_employee e on pe.emp_id=e.id
+        where 1=1
+        and pe.pg_id=#{workAttendanceCo.projectId}
+        and w.create_time like CONCAT('%',#{workAttendanceCo.yearValue},'-',#{workAttendanceCo.monthValue},'%')
+        <if test="workAttendanceCo.keyWord!=null" >
+            and CONCAT(w.employee_id,e.emp_name) like CONCAT('%',#{workAttendanceCo.keyword},'%')
+        </if>
+        <if test="workAttendanceCo.subStatus!=null and workAttendanceCo.subStatus!=''" >
+            and w.sub_status=#{workAttendanceCo.subStatus}
+        </if>
+
+    </select>
+    <!--根据id获得当前项目组的员工考勤信息-->
+    <select id="getBaWorkAttendanceVoById" parameterType="java.util.Map" resultType="com.settlement.vo.BaWorkAttendanceVo">
+        select e.emp_name as employeeName
+              ,w.*
+        from
+            ba_work_attendance w,
+            ba_employee e
+        where e.del_flag=#{delFlag}
+            and w.employee_id=e.id
+            and w.id=#{id}
+        order by w.sub_status asc
+    </select>
+    <!--根据年月查询考勤记录-->
+    <select id="getBaWorkAttendanceVoByNextMonth" parameterType="java.util.Map" resultType="com.settlement.entity.BaWorkAttendance">
+        select
+             w.*
+        from
+            ba_work_attendance w,
+            ba_employee e
+        where e.del_flag=#{delFlag}
+        and w.employee_id=e.id
+        and w.create_time like CONCAT('%',#{yearValue},'-',#{monthValue},'%')
+        order by w.sub_status asc
+    </select>
+    <!--根据申请修改的考勤id获得要修改的数据-->
+    <select id="getWorkAttendanceByApplyId" parameterType="com.settlement.co.WorkAttendanceCo" resultType="com.settlement.vo.BaWorkAttendanceVo">
+        select
+            e.emp_name as employeeName,
+            a.update_status as updateStatus,
+            b.*
+        from ba_apply_attendance a
+        inner join ba_work_attendance b on b.id=a.attendance_id
+        inner join ba_employee e on b.employee_id=e.id
+        where a.apply_id=1
+            and e.del_flag=#{workAttendanceCo.delFlag}
+            and b.sub_status=#{workAttendanceCo.subStatus}
+        order by b.sub_status asc
+    </select>
+    <!-- 生成考勤记录-->
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into ba_work_attendance(work_days,employee_id,pg_id,sub_status,create_time) values
+        <foreach collection="list" item="baWorkAttendance" index="" separator=",">
+            (#{baWorkAttendance.workDays},#{baWorkAttendance.employeeId},#{baWorkAttendance.pgId},#{baWorkAttendance.subStatus},#{baWorkAttendance.createTime})
+        </foreach>
+
+    </insert>
+
+    <!-- 批量修改考勤状态 -->
+    <update id="updateSubStatusBatch" parameterType="java.util.List">
+        <foreach collection="list" item="baWorkAttendance" index="index" separator=";">
+            update ba_work_attendance
+            set
+            sub_status = #{baWorkAttendance.subStatus}
+            where id = #{baWorkAttendance.id}
+        </foreach>
+    </update>
+</mapper>

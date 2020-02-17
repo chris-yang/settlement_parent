@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.settlement.mapper.BaEmpApplyCheckMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.settlement.entity.BaEmpApplyCheck">
+        <id column="id" property="id" />
+        <result column="apply_remark" property="applyRemark" />
+        <result column="apply_time" property="applyTime" />
+        <result column="apply_user_id" property="applyUserId" />
+        <result column="check_status" property="checkStatus" />
+        <result column="check_user_id" property="checkUserId" />
+        <result column="check_time" property="checkTime" />
+        <result column="update_password" property="updatePassword" />
+        <result column="check_remark" property="checkRemark" />
+        <result column="create_time" property="createTime" />
+        <result column="end_status" property="endStatus" />
+    </resultMap>
+
+    <!-- 员工申请信息列表 -->
+    <select id="getEmpApplyCheckList" parameterType="com.settlement.co.EmpApplyCheckCo" resultType="com.settlement.vo.EmpApplyCheckVo">
+        SELECT
+         beac.id,
+         beac.apply_remark,
+         beac.apply_time,
+         beac.check_status,
+         beac.check_time,
+         beac.check_remark,
+         sdd.dic_content as checkStatusContent,
+         su.real_name as applyUserContent,
+         su1.real_name as checkUserContent,
+         bpg.pg_name as projectName,
+         beac.end_status
+        FROM
+         ba_emp_apply_check beac left join sys_data_dic sdd on beac.check_status = sdd.dic_code
+         left join sys_user su on beac.apply_user_id = su.id
+         left join sys_user su1 on beac.check_user_id = su1.id
+         left join ba_project_group bpg on bpg.id = beac.pg_id
+        <where>
+         <if test="empApplyCheckCo.applyUserId != null and empApplyCheckCo.applyUserId != ''">
+            beac.apply_user_id = #{empApplyCheckCo.applyUserId}
+         </if>
+         <if test="empApplyCheckCo.checkUserId != null and empApplyCheckCo.checkUserId != ''">
+            and beac.check_user_id = #{empApplyCheckCo.checkUserId}
+         </if>
+         <if test="empApplyCheckCo.checkStatus != null and empApplyCheckCo.checkStatus != ''">
+            and beac.check_status = #{empApplyCheckCo.checkStatus}
+         </if>
+         <if test="empApplyCheckCo.applyDate != null and empApplyCheckCo.applyDate != ''">
+            and DATE_FORMAT(beac.apply_time,'%Y-%m-%d') = #{empApplyCheckCo.applyDate}
+         </if>
+         </where>
+         order by beac.apply_time DESC
+    </select>
+
+</mapper>

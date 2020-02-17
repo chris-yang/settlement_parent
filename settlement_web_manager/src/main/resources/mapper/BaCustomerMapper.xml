@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.settlement.mapper.BaCustomerMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.settlement.entity.BaCustomer">
+        <id column="id" property="id" />
+        <result column="customer_name" property="customerName" />
+        <result column="code" property="code" />
+        <result column="chief" property="chief" />
+        <result column="pid" property="pid" />
+        <result column="level" property="level" />
+        <result column="enabled" property="enabled" />
+        <result column="create_user_id" property="createUserId" />
+        <result column="create_time" property="createTime" />
+        <result column="del_flag" property="delFlag" />
+    </resultMap>
+    <!--客户列表-->
+    <select id="listPageData" parameterType="com.settlement.co.CustomerCo" resultType="com.settlement.vo.BaCustomerVo">
+        select c.*
+        ,u.real_name as chiefName
+        from ba_customer c
+        left join sys_user u on c.chief=u.id
+        where 1=1
+              and c.del_flag=#{customerCo.delFlag}
+        <if test="customerCo.keyword!=null">
+            and c.customer_name like CONCAT('%',#{customerCo.keyword},'%')
+        </if>
+        <if test="customerCo.roleCode=='AM'">
+            and c.chief=#{customerCo.userId}
+        </if>
+    </select>
+    <!--根据用户id查询当前的客户信息和项目组-->
+    <select id="getCustomerAndProjectByUserId" parameterType="java.util.Map" resultType="com.settlement.vo.BaCustomerAndProjectVo">
+        select
+            c.id as id,
+            c.customer_name as customerName,
+            c.code as code,
+            pg.id as projectId,
+            pg.`code` as projectCode,
+            pg.pg_name as projectName
+            from ba_customer c
+            left join ba_project_group pg on c.id = pg.customer_id
+            left join ba_project_group_assistant pga on pga.pg_id = pg.id
+            where c.enabled=#{enabled}
+                and pg.enabled=#{enabled}
+                and pg.check_status=#{checkStatus}
+            <if test="roleCode=='AM'">
+                and pg.check_user_id=#{userId}
+            </if>
+            <if test="roleCode =='ASSISTANT'">
+                 and pga.assistant_id=#{userId}
+            </if>
+
+    </select>
+
+    <!-- 根据部门ID取得客户 -->
+    <select id="getBaCustomerByDeptId" parameterType="java.util.Map" resultType="com.settlement.vo.BaCustomerVo">
+        SELECT
+         bc.id,
+         bc.`code`,
+         bc.customer_name
+        FROM
+         ba_customer bc,
+         ba_dept_customer bdc
+        WHERE
+         bc.id = bdc.customer_id
+         and bc.enabled = #{enabled}
+         and bdc.dept_id = #{deptId}
+    </select>
+    <!-- 根据客户负责人，查询客户 -->
+    <select id="getBaCustomerByChief" parameterType="java.util.Map" resultType="com.settlement.vo.BaCustomerVo">
+        SELECT
+         bc.id,
+         bc.`code`,
+         bc.customer_name
+        FROM
+         ba_customer bc
+        WHERE
+         bc.enabled = #{enabled}
+         and bc.chief = #{chief}
+    </select>
+
+    <!-- 批量修改考勤状态 -->
+    <update id="updateBatchs" parameterType="java.util.List">
+        <foreach collection="list" item="baCustomer" index="index" separator=";">
+            update ba_customer
+            set
+            chief = #{baCustomer.chief}
+            where id = #{baCustomer.id}
+        </foreach>
+    </update>
+</mapper>

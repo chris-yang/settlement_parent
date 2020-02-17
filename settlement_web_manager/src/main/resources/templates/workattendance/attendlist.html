@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html class="x-admin-sm"  xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:bolck th:include="common/header :: header('数据字典管理')" />
+</head>
+<body>
+
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="layui-collapse" lay-accordion="">
+                        <div class="layui-colla-item">
+                            <h2 class="layui-colla-title">查询条件</h2>
+                            <div class="layui-colla-content">
+                    <!--考勤月份-->
+                    <div class="layui-form-item">
+                        <div class="layui-inline ">
+                            <span class="x-red"></span>考勤月份:
+                        </div>
+                        <div class="layui-inline"  >
+                            <select id="years" name="years"  lay-filter="years" lay-verify="years" style="width: 100px;height: 30px;" >
+                                <option th:each="year:${years}" th:value="${year}" th:text="${year}"></option>
+                            </select>
+                        </div>
+                        <div class="layui-inline ">
+                            <span class="x-red"></span>年
+                        </div>
+                        <div class="layui-inline">
+                            <select id="months" name="months"  lay-filter="months" lay-verify="years" style="width: 100px;height: 30px;">
+                                <option th:each="month:${months}" th:value="${month}" th:text="${month}"></option>
+                            </select>
+                        </div>
+                        <div class="layui-inline ">
+                            <span class="x-red"></span>月
+                        </div>
+
+
+                    </div>
+                    <div class="layui-form" style="margin-top: 8px;">
+                        <div class="layui-inline ">
+                            <span class="x-red"></span>提交状态:
+                        </div>
+                        <div class="layui-inline">
+                            <select id="subStatus" name="subStatus"  lay-filter="subStatus" lay-verify="subStatus" style="width: 80px;height: 30px;">
+                                <option value="">请选择</option>
+                                <option th:each="status:${subStatusList}" th:value="${status.dicCode}" th:text="${status.dicContent}"></option>
+                            </select>
+                        </div>
+                        <div class="layui-inline" >
+                            <input type="text" id="keyword" name="keyword"  value="" placeholder="请输入" autocomplete="off" class="layui-input" style="width: 200px">
+                        </div>
+                        <div class="layui-inline" >
+                            <button class="layui-btn" id="search" data-type="reload" lay-submit="" lay-filter="search"><i class="layui-icon">&#xe615;</i>查询</button>
+                        </div>
+                    </div>
+                 <!--考勤时间点-->
+<!--                        <div class="layui-inline layui-show-xs-block" style="margin-left: 221px;">-->
+<!--                            <lable class="x-red">-->
+<!--                                <span th:text="${tipCountMessage}"></span>-->
+<!--                            </lable>-->
+<!--                        </div>-->
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form" style="margin-top: 8px;">
+                <!--考勤时间点-->
+                <div class="layui-inline" style="margin-bottom: 8px;">
+                    <button class="layui-btn layui-btn-warm"  lay-submit="" ><i class="layui-icon"></i>结算时间点：<span th:text="${stopTime}"></span></button>
+                    <button class="layui-btn layui-btn-warm"  lay-submit="" ><i class="layui-icon"></i>结算完成时间点：<span th:text="${compelteTime}"></span></button>
+<!--                    <div class="layui-inline layui-show-xs-block">-->
+<!--                        <span class="x-red"></span>结算时间点:-->
+<!--                    </div>-->
+<!--                    <div class="layui-inline layui-show-xs-block">-->
+<!--                        <lable class="x-black">-->
+<!--                            <span th:text="${stopTime}"></span>-->
+<!--                        </lable>-->
+<!--                    </div>-->
+<!--                    <div class="layui-inline layui-show-xs-block">-->
+<!--                        <span class="x-red"></span>结算完成时间点-->
+<!--                    </div>-->
+<!--                    <div class="layui-inline layui-show-xs-block">-->
+<!--                        <lable class="x-black">-->
+<!--                            <span th:text="${compelteTime}"></span>-->
+<!--                        </lable>-->
+<!--                    </div>-->
+                    <div  class="layui-inline layui-show-xs-block" style="border: 1px solid #1E9FFF;">
+                        <lable class="x-red" style="float:right;">
+                            <span th:text="${tipCountMessage}"></span>
+                        </lable>
+                    </div>
+                            <!--                            <div class="layui-inline layui-show-xs-block">-->
+                            <!--                                <lable class="x-red">-->
+                            <!--                                    <span th:text="${tipStopAndCompelteTime.length()>0}?${tipStopAndCompelteTime}"></span>-->
+                            <!--                                </lable>-->
+                            <!--                            </div>-->
+                </div>
+            </div>
+
+                    <div class="layui-form-item" style="margin-top: 2px;">
+                    <table class="layui-table layui-form" id="dataTable" lay-filter="dataTable">
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/html" id="toolBarHead">
+    <div class="layui-btn-container">
+        <button  id="import" lay-event="import" class="layui-btn">批量导入</button>
+        <button  lay-event="applymodify" class="layui-btn" >申请修改</button>
+        <button  lay-event="commmit" class="layui-btn layui-btn-normal"  >提交</button>
+        <button  lay-event="generate" class="layui-btn layui-btn-normal " >生成考勤记录</button>
+    </div>
+</script>
+<script type="text/html" id="toolBar">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+</script>
+<script type="text/html" id="idselect">
+    <input type="checkbox" name="id" value="{{d.id}}"  lay-filter="idselect">
+</script>
+<script id="subStatusTpl" type="text/html">
+    {{#  if(d.subStatusContent === '修改中'){ }}
+    <span style="color: #71C671;font-weight: bold;">{{ d.subStatusContent }}</span>
+    {{#  } else if(d.subStatusContent === '已提交') { }}
+    <span style="color: #EEAD0E;font-weight: bold;">{{ d.subStatusContent }}</span>
+    {{#  } else { }}
+    {{ d.subStatusContent }}
+    {{#  } }}
+</script>
+<script th:src="@{/js/common/common.js}" type="text/javascript" charset="utf-8"></script>
+<script th:src="@{/js/workattendance/workattendance.js}" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript"  th:inline="javascript">
+    layui.use(['table','form','upload','jquery'], function(){
+        var form = layui.form;
+        var table = layui.table;
+        var upload = layui.upload;
+        var $ = layui.jquery;
+
+        var projectTreeObj = window.parent.layui.dtree.getNowParam("projectTree");
+        var projectId = projectTreeObj.nodeId;
+
+        table.render({
+            elem: '#dataTable',
+            url: '/ba-work-attendance/pagedata',
+            page: true,
+            title: '考勤记录',
+            height: 'full-210',
+            toolbar: '#toolBarHead',
+            defaultToolbar: ['filter', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+                title: '提示'
+                ,layEvent: 'LAYTABLE_TIPS'
+                ,icon: 'layui-icon-tips'
+            }],
+            where:{
+                checkUserId:[[${checkUserId}]]
+                ,projectId: projectId
+                ,yearValue:$('#years').children('option:selected').val()
+                ,monthValue:$('#months').children('option:selected').val()
+            },
+             //id: 'userData',
+            cols: [
+                [
+                {field:'id',type:'checkbox',fixed:'left'},
+                {field:'employeeCode',title:'员工编号',align:'center'},
+                {field:'employeeName',title:'员工姓名',align:'center'},
+                {field:'workDays',title:'标准工作天数',align:'center'},
+                {field:'attendanceDays',title:'出勤天数',align:'center'},
+                {field:'absenteeismDays',title:'缺勤天数',align:'center'},
+                {field:'floatPerformance',title:'浮动绩效',hide:true},
+                {field:'bonus',title:'奖金',hide:true},
+                {field:'checkWorkDays',title:'核算工作天数',align:'center'},
+                {field:'workDayOvertimeH',title:'工作日加班（小时）',hide:true},
+                {field:'weekendOvertimeH',title:'周末加班（小时）',hide:true},
+                {field:'festivalOvertimeH',title:'法定节假日加班（小时）',hide:true},
+                {field:'工作日加班（天）',title:'工作日加班（天）',hide:true},
+                {field:'weekendOvertimeD',title:'周末加班（天）',hide:true},
+                {field:'festivalOvertimeD',title:'法定节假日加班（天）',hide:true},
+                {field:'remainderOvertimeLmH',title:'上月剩余加班（小时）',hide:true},
+                {field:'monthOvertimeH',title:'本月加班（小时）',hide:true},
+                {field:'takeHoursOff',title:'调休（小时）',hide:true},
+                {field:'details',title:'调休详情',hide:true},
+                {field:'remainderOvertimeMH',title:'本月剩余加班（小时）',hide:true},
+                {field:'taxiFare',title:'打车费',hide:true},
+                {field:'travelExpenses',title:'差旅费',hide:true},
+                {field:'meals',title:'餐费',hide:true},
+                {field:'telephoneBill',title:'话费',hide:true},
+                {field:'overtimeAllowance',title:'加班补助',hide:true},
+                {field:'otherAddCost',title:'其他加项费用',hide:true},
+                {field:'otherSubCost',title:'其他减项费用',hide:true},
+                {field:'subStatusContent',title:'状态',align:'center',templet: '#subStatusTpl'},
+                {field:'subStatus',title:'subStatus',hide:true},
+                {field:'remark',title:'备注',align:'center'}
+                ,{fixed:'right',title:'操作',align:'center',toolbar:'#toolBar',width:60}
+            ]
+            ]
+           ,done:function(res,curr,count) {
+               //如果是异步请求数据方式，res即为你接口返回的信息。
+               //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+               // for(var i=0;i<count;i++) {
+               //     if(res.data[i].subStatus == 'S') {
+               //         $($(".layui-table-body.layui-table-main tr")[i]).css("background-color", "#1E9FFF");
+               //     }
+               // }
+               //th hover
+               //  $('th').hover(function(){
+               //      $("th").css("background-color","yellow");
+               //  });
+           }
+        });
+
+        //按钮事件绑定
+            $('.layui-btn').on('click', function(){
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+
+        var $ = layui.$, active = {
+            reload: function(){
+                var keyword = $('#keyword');
+                var subStatus=$('#subStatus').children('option:selected').val();
+                //执行重载
+                table.reload('dataTable', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+                        keyword: keyword.val()
+                        ,subStatus: subStatus
+                    }
+                }, 'data');
+            }
+        };
+        //监听事件
+        table.on('toolbar(dataTable)', function(obj){
+            //var checkStatus = table.checkStatus(obj.config.id);
+            switch(obj.event){
+                case 'applymodify':
+                    //项目负责人AM
+                    var checkUserId = [[${checkUserId}]];
+                    var totalApplyCount = [[${totalApplyCount}]];
+                    var applyCount = [[${applyCount}]];
+                    if(checkStopTimeStatus(projectId)){
+                        return;
+                    }
+                    applyModify('申请修改','/ba-work-attendance/applymodify/'+checkUserId,projectId,applyCount,totalApplyCount,table,layer,500,450);
+                    break;
+                case 'commmit':
+                    if(checkStopTimeStatus(projectId)){
+                        return;
+                    }
+                    var compelteTime=[[${compelteTime}]];
+                    var stopTime=[[${stopTime}]];
+                    commitWorkAttendanceOper('/ba-work-attendance/commit/',projectId,stopTime,compelteTime,table,layer);
+                    break;
+                case 'generate':
+                    generateFun(projectId);
+                    break;
+                case 'import':
+                    importFun(projectId,upload);
+                    break;
+            };
+        });
+        // 监听工具栏
+        table.on('tool(dataTable)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'edit'){
+                editFun(projectId,data);
+            }
+        });
+
+        $('#years').change(function () {
+
+        });
+        //选择月份重新加载数据
+        $('#months').change(function () {
+            var monthValue=$(this).children('option:selected').val();
+            var yearValue=$('#years').children('option:selected').val();
+            //执行重载
+            table.reload('dataTable', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                ,where: {
+                        monthValue:monthValue
+                        ,yearValue:yearValue
+                }
+            }, 'data');
+
+        });
+
+        form.render();
+
+    });
+
+</script>
+</html>

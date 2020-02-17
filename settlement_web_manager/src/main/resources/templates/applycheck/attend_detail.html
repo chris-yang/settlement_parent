@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html class="x-admin-sm"  xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:bolck th:include="common/header :: header('数据字典管理')" />
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body layui-table-body layui-table-main" >
+                    <table class="layui-table layui-form" id="dataTable" lay-filter="dataTable">
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script id="subStatusTpl" type="text/html">
+    {{#  if(d.subStatusContent === '修改中'){ }}
+    <span style="color: #71C671;font-weight: bold;">{{ d.subStatusContent }}</span>
+    {{#  } else if(d.subStatusContent === '已提交') { }}
+    <span style="color: #EEAD0E;font-weight: bold;">{{ d.subStatusContent }}</span>
+    {{#  } else { }}
+    {{ d.subStatusContent }}
+    {{#  } }}
+</script>
+<script th:src="@{/js/common/common.js}" type="text/javascript" charset="utf-8"></script>
+<script type="text/html" id="idselect">
+    <input type="checkbox" name="id" value="{{d.id}}"  lay-filter="idselect">
+</script>
+<script type="text/javascript"  th:inline="javascript">
+    layui.use(['laydate','table','form','element'], function(){
+        var laydate = layui.laydate;
+        var  form = layui.form;
+        var table = layui.table;
+        // var layer = layui.layer;
+        // var $ = layui.jquery;
+        table.render({
+            elem: '#dataTable',
+            url: '/ba-apply/check/detail/workattendancelist/pagedata',
+            // toolbar: '',
+            page: true,
+            title: '考勤记录',
+            height: 'full-100',
+            toolbar: '#toolBarHead',
+            defaultToolbar: ['filter', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+                title: '提示'
+                ,layEvent: 'LAYTABLE_TIPS'
+                ,icon: 'layui-icon-tips'
+            }],
+            where: {
+                id: [[${applyId}]]
+                ,mode:'view'
+            },
+            // id: 'userData',
+            cols: [
+                [
+                    {field:'id',type:'checkbox',fixed:'left'},
+                    {field:'employeeId',title:'员工编号',align:'center'},
+                    {field:'employeeName',title:'员工姓名',align:'center'},
+                    {field:'workDays',title:'标准工作天数',align:'center'},
+                    {field:'attendanceDays',title:'出勤天数',align:'center'},
+                    {field:'absenteeismDays',title:'缺勤天数',align:'center'},
+                    {field:'floatPerformance',title:'浮动绩效',hide:true},
+                    {field:'bonus',title:'奖金',hide:true},
+                    {field:'checkWorkDays',title:'核算工作天数',align:'center'},
+                    {field:'workDayOvertimeH',title:'工作日加班（小时）',hide:true},
+                    {field:'weekendOvertimeH',title:'周末加班（小时）',hide:true},
+                    {field:'festivalOvertimeH',title:'法定节假日加班（小时）',hide:true},
+                    {field:'工作日加班（天）',title:'工作日加班（天）',hide:true},
+                    {field:'weekendOvertimeD',title:'周末加班（天）',hide:true},
+                    {field:'festivalOvertimeD',title:'法定节假日加班（天）',hide:true},
+                    {field:'remainderOvertimeLmH',title:'上月剩余加班（小时）',hide:true},
+                    {field:'monthOvertimeH',title:'本月加班（小时）',hide:true},
+                    {field:'takeHoursOff',title:'调休（小时）',hide:true},
+                    {field:'details',title:'调休详情',hide:true},
+                    {field:'remainderOvertimeMH',title:'本月剩余加班（小时）',hide:true},
+                    {field:'taxiFare',title:'打车费',hide:true},
+                    {field:'travelExpenses',title:'差旅费',hide:true},
+                    {field:'meals',title:'餐费',hide:true},
+                    {field:'telephoneBill',title:'话费',hide:true},
+                    {field:'overtimeAllowance',title:'加班补助',hide:true},
+                    {field:'otherAddCost',title:'其他加项费用',hide:true},
+                    {field:'otherSubCost',title:'其他减项费用',hide:true},
+                    {field:'subStatusContent',title:'状态',align:'center',templet: '#subStatusTpl'},
+                    {field:'subStatus',title:'subStatus',hide:true},
+                    {field:'remark',title:'备注',align:'center'}
+
+             ]
+            ]
+            ,done: function(res,curr,count) {
+                checkboxDisable(res,'item.subStatus','S');
+                res.data.forEach(function (item, index) {
+                    if (item.subStatus == 'S') {
+                        var tr = $("tr[data-index='" + index + "']");
+                        var a = $(tr.find("a"));
+                        a.addClass("layui-btn-disabled");
+                    }
+                });
+            }
+        });
+
+        var $ = layui.$, active = {
+
+        };
+
+    });
+</script>
+</html>

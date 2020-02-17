@@ -1,0 +1,15 @@
+# Project exclude paths
+/settlement_baapply/target/
+/settlement_common/target/
+/settlement_common_entity/target/
+/settlement_common_service/target/
+/settlement_service_baapplyTransfer/target/
+/settlement_service_bacity/target/
+/settlement_service_bacontract/target/
+/settlement_service_baexportparam/target/
+/settlement_service_baformulaparam/target/
+/settlement_service_bapg/target/
+/settlement_service_sysdatadic/target/
+/settlement_service_sysuser/target/
+/settlement_service_workattendance/target/
+/settlement_web_manager/target/

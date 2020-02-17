@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.settlement.mapper.BaApplyEmployeeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.settlement.entity.BaApplyEmployee">
+        <id column="id" property="id" />
+        <result column="apply_id" property="applyId" />
+        <result column="emp_id" property="empId" />
+        <result column="update_status" property="updateStatus" />
+        <result column="oper_time" property="operTime" />
+    </resultMap>
+
+    <!-- 批量保存员工申请修改 -->
+    <insert id="insertEmpApplyBatch" parameterType="java.util.List">
+        INSERT INTO ba_apply_employee(apply_id, emp_id, update_status, oper_time) VALUES
+        <foreach collection="applyEmps" item="applyEmp" index="index" separator=",">
+            (#{applyEmp.applyId}, #{applyEmp.empId}, #{applyEmp.updateStatus}, #{applyEmp.operTime})
+        </foreach>
+    </insert>
+
+    <!-- 查询申请修改的员工信息 -->
+    <select id="getApplyEmpList" parameterType="com.settlement.co.EmpApplyCo" resultType="com.settlement.vo.EmployeeVo">
+            SELECT
+             bae.id,
+             be.emp_name,
+             be.`code`,
+             be.entrance_time,
+             be.responsible_person,
+             be.rate_email_filename,
+             be.pos_level,
+             blp.level_name as pos_level_input,
+             be.level_mode,
+             be.place,
+             be.price_month,
+             be.price_day,
+             be.send_copy_email,
+             be.claim_expense_person,
+             be.work_attendence_person,
+             be.unit,
+             sdd.dic_content as unitContent
+            FROM
+             ba_apply_employee bae left join  ba_employee be on bae.emp_id = be.id
+             left join ba_level_price blp on  blp.id = be.pos_level
+             left join sys_data_dic sdd on be.unit = sdd.dic_code
+            WHERE
+             bae.apply_id = #{empApplyCo.applyId}
+             AND be.level_mode = #{empApplyCo.levelModeF}
+             AND bae.update_status = #{empApplyCo.updateStatus}
+           UNION ALL
+            SELECT
+             bae.id,
+             be.emp_name,
+             be.`code`,
+             be.entrance_time,
+             be.responsible_person,
+             be.rate_email_filename,
+             be.pos_level,
+             be.pos_level_input,
+             be.level_mode,
+             be.place,
+             be.price_month,
+             be.price_day,
+             be.send_copy_email,
+             be.claim_expense_person,
+             be.work_attendence_person,
+             be.unit,
+             sdd.dic_content as unitContent
+            FROM
+             ba_apply_employee bae left join ba_employee be on bae.emp_id = be.id
+             left join sys_data_dic sdd on be.unit = sdd.dic_code
+            WHERE
+             bae.apply_id = #{empApplyCo.applyId}
+             AND be.level_mode = #{empApplyCo.levelModeH}
+             AND bae.update_status = #{empApplyCo.updateStatus}
+    </select>
+
+</mapper>

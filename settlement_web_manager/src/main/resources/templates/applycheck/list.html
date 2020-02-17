@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html class="x-admin-sm"  xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+    <head>
+        <th:bolck th:include="common/header :: header('审核管理')" />
+    </head>
+    <body>
+        <div class="x-nav">
+          <span class="layui-breadcrumb">
+            <a href="/home">首页</a>
+            <a href="">审核管理</a>
+            <a>
+              <cite>申请修改审核</cite></a>
+          </span>
+          <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+        </div>
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+
+                        <div class="layui-tab layui-tab-card" lay-filter="check-tab">
+                            <ul class="layui-tab-title">
+                                <li data-status="0" class="layui-this">员工信息申请审核</li>
+                                <li data-status="1">考勤申请审核</li>
+                            </ul>
+                            <div class="layui-tab-content">
+                                <div class="layui-tab-item layui-show">
+                                    <table class="layui-table layui-form" id="emp-dataTable" lay-filter="emp-dataTable"></table>
+                                </div>
+                                <div class="layui-tab-item">
+                                    <table class="layui-table layui-form" id="work-dataTable" lay-filter="work-dataTable"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </body>
+    <script type="text/html" id="toolBar">
+        <shiro:hasPermission name="empApplyCheck:list,empApplyCheck:check">
+            <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">详细</a>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="empApplyCheck:list">
+             <a class="layui-btn layui-btn-xs" lay-event="check">审核</a>
+        </shiro:hasPermission>
+    </script>
+    <script id="checkStatusTpl" type="text/html">
+        {{#  if(d.checkStatusContent === '审核通过'){ }}
+        <span style="color: #71C671;font-weight: bold;">{{ d.checkStatusContent }}</span>
+        {{#  } else if(d.checkStatusContent === '审核未通过') { }}
+        <span style="color: #EEAD0E;font-weight: bold;">{{ d.checkStatusContent }}</span>
+        {{#  } else { }}
+        {{ d.checkStatusContent }}
+        {{#  } }}
+    </script>
+    <script type="text/javascript" th:inline="javascript">
+        var checkStatusPass = [[ ${PG_CHECKSTATUS_CHECK_PASS} ]];
+        var checkStatusNoPass = [[ ${PG_CHECKSTATUS_CHECK_NOPASS} ]];
+        var mode = '';
+        layui.use(['element','table'],function() {
+            var $ = layui.jquery, table = layui.table, element = layui.element;
+            // 初始化加载
+            getTableList('emp-dataTable','/ba-emp-apply-check/check-pagedata');
+
+            // 监听tab切换
+            element.on('tab(check-tab)',function(data) {
+                var status = $(this).attr('data-status');
+                var index = '';
+                var url = '';
+                if (status == '0') {
+                    index = 'emp-dataTable';
+                    url = '/ba-emp-apply-check/check-pagedata';
+                } else if(status= '1') {
+                    index = "work-dataTable";
+                    url = '/ba-apply/check/workattend/pagedata'
+                }
+                getTableList(index, url);
+            });
+            // 员工申请修改监听审核、详细
+            table.on('tool(emp-dataTable)', function(obj){
+                mode = 'e';
+                var data = obj.data;
+                var id = data.id;
+                var checkStatus = data.checkStatus;
+                if(obj.event === 'detail'){
+                    xadmin.open('详情','/ba-emp-apply-check/detail/' + data.id,1000,545);
+                } else if(obj.event === 'check'){
+                    if (checkStatus == checkStatusPass || checkStatus == checkStatusNoPass) {
+                        layer.msg("记录处于【审核通过】或者【审核未通过】状态，不能审核",{icon:5});
+                    } else {
+                        xadmin.open('申请修改审核','/ba-emp-apply-check/check/'+ id + '/' + mode,800,400);
+                    }
+                }
+            });
+
+            // 考勤监听审核、详细
+            table.on('tool(work-dataTable)', function(obj){
+                mode = 'w';
+                var data = obj.data;
+                var id = data.id;
+                var checkStatus = data.checkStatus;
+                if(obj.event === 'detail'){
+                    //layer.msg('ID：'+ data.id + ' 的查看操作');
+                    xadmin.open('申请工时详情','/ba-apply-check/workattendance/detail/' + data.id,1000,545);
+                } else if(obj.event === 'check'){
+                    if (checkStatus == checkStatusPass || checkStatus == checkStatusNoPass) {
+                        layer.msg("记录处于【审核通过】或者【审核未通过】状态，不能审核",{icon:5});
+                    } else {
+                        xadmin.open('申请修改审核','/ba-emp-apply-check/check/'+ id + '/' + mode,800,400);
+                    }
+                }
+            });
+            // 加载表格数据
+            function getTableList(index,url) {
+                table.render({
+                    elem: '#' + index,
+                    url: url,
+                    // toolbar: '',
+                    page: true,
+                   // title: '导出参数',
+                    height: 'full-210',
+                    done: function(res,curr,count) {
+                        var that = this.elem.next();
+                        res.data.forEach(function (item, index) {
+                            if (item.checkStatus == checkStatusPass || item.checkStatus == checkStatusNoPass) {
+                                var tr = $("tr[data-index='" + index + "']");
+                                var a = $(tr.find("a[lay-event='check']"));
+                                a.addClass("layui-btn-disabled");
+                            }
+                        });
+                    },
+                    cols: [
+                            [
+                                {field:'id',type:'checkbox',fixed:'left',hide:true},
+                                {field:'applyUserContent',title:'申请人 ',align:'center'},
+                                {field:'projectName',title:'项目组 ',align:'center'},
+                               //  {field:'applyTypeContent',title:'类型',align:'center'},
+                                {field:'applyRemark',title:'描述',align:'center'},
+                                {field:'checkStatus',title:'',align:'center',hide:true},
+                                {field:'applyTime',title:'申请时间',align:'center'},
+                                {field:'checkStatusContent',title:'审核状态',align:'center',templet: '#checkStatusTpl'},
+                                {fixed:'right',title:'操作',align:'center',toolbar:'#toolBar',width:150}
+
+                            ]
+                        ]
+                })
+            }
+        })
+    </script>
+</html>

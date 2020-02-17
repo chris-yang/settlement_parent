@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/settlement_baapply" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/settlement_common" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/settlement_common_entity" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/settlement_common_service" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/settlement_common_web" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/settlement_service_baapplyTransfer" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/settlement_service_bacity" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/settlement_service_bacontract" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/settlement_service_baexportparam" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/settlement_service_baformulaparam" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/settlement_service_bapg" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/settlement_service_sysdatadic" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/settlement_service_sysuser" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/settlement_service_workattendance" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/settlement_web_manager" charset="UTF-8" />
+  </component>
+</project>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.settlement.mapper.BaTimeParamMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.settlement.entity.BaTimeParam">
+        <id column="id" property="id" />
+        <result column="param_code" property="paramCode" />
+        <result column="param_item" property="paramItem" />
+        <result column="param_value" property="paramValue" />
+        <result column="type" property="type" />
+        <result column="enabled" property="enabled" />
+        <result column="create_user_id" property="createUserId" />
+        <result column="create_time" property="createTime" />
+        <result column="del_flag" property="delFlag" />
+    </resultMap>
+
+    <select id="listPageData" parameterType="com.settlement.co.TimeParamCo" resultType="com.settlement.vo.BaTimeParamVo">
+        select
+            t.id,
+            t.param_code,
+            t.param_item,
+            t.param_value,
+            t.type,
+            d.dic_content as typeContent,
+            t.enabled,
+            t.create_user_id,
+            t.create_time,
+            t.del_flag
+        from ba_time_param t
+        left join sys_data_dic d on d.dic_code=t.type
+        where 1=1
+             and t.del_flag=#{timeParamCo.delFlag}
+         <if test="timeParamCo.keyWord!=null" >
+            and CONCAT(t.param_code,t.param_item) like CONCAT('%',#{timeParamCo.keyword},'%')
+         </if>
+    </select>
+
+    <!-- 根据id获得BaTimeParamVo-->
+    <select id="getTimeParamVoById" parameterType="java.util.Map" resultType="com.settlement.vo.BaTimeParamVo">
+       select
+            t.id,
+            t.param_code,
+            t.param_item,
+            t.param_value,
+            t.type,
+            d.dic_content as typeContent,
+            t.enabled,
+            t.create_user_id,
+            t.create_time,
+            t.del_flag
+        from ba_time_param t
+        left join sys_data_dic d on d.dic_code=t.type
+        where t.id=#{id}
+             and t.enabled=#{enabled}
+    </select>
+
+    <!--根据projectId 和 时间点结参数类型返回结算日期-->
+    <select id="getTimeParamValueByProjectId" parameterType="java.util.Map" resultType="java.lang.String">
+        select
+            tp.param_value
+       from ba_time_param tp
+       left join ba_pg_time_param ptg on tp.id = ptg.t_p_id
+       where
+            tp.enabled=#{enabled}
+           and ptg.pg_id=#{projectId}
+           and tp.type=#{type}
+    </select>
+
+    <select id="getTimeParamVoByProjectIdAndType" parameterType="java.util.Map" resultType="com.settlement.vo.BaTimeParamVo">
+        SELECT
+            tp.*,
+            ptp.pg_id as projectId
+        from ba_time_param tp
+        left join ba_pg_time_param ptp on tp.id=ptp.t_p_id
+        where tp.type=#{type}
+          and ptp.pg_id=#{projectId}
+          and tp.enabled=#{enabled}
+    </select>
+</mapper>
